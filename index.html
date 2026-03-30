@@ -188,8 +188,13 @@ const GAME_DAYS = [
   'Sex 07/08','Qua 12/08'
 ];
 
-let results = {};
-let playoffResults = { sf1: null, sf2: null, final: null, third: null };
+let results = JSON.parse(localStorage.getItem('sinuca-results') || '{}');
+let playoffResults = JSON.parse(localStorage.getItem('sinuca-playoffs') || '{"sf1":null,"sf2":null,"final":null,"third":null}');
+
+function saveState() {
+  localStorage.setItem('sinuca-results', JSON.stringify(results));
+  localStorage.setItem('sinuca-playoffs', JSON.stringify(playoffResults));
+}
 
 function pname(id) { return PLAYERS[id - 1]; }
 
@@ -205,6 +210,7 @@ function pname(id) { return PLAYERS[id - 1]; }
 function setWinner(idx, winner) {
   if (results[idx] === winner) delete results[idx];
   else results[idx] = winner;
+  saveState();
   const active = document.querySelector('.tab.active');
   const activeTab = active ? active.textContent.trim().toLowerCase() : '';
   renderMatches();
@@ -445,6 +451,7 @@ function setPO(match, winner) {
     playoffResults[match] = winner;
     if (match === 'sf1' || match === 'sf2') { playoffResults.final = null; playoffResults.third = null; }
   }
+  saveState();
   renderPlayoffs();
 }
 
@@ -458,6 +465,10 @@ function showTab(name) {
   if (name === 'standings') renderStandings();
   if (name === 'playoffs') renderPlayoffs();
 }
+
+// Restore saved state on load
+updateProgress();
+renderStandings();
 </script>
 </body>
 </html>
