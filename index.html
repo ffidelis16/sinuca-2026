@@ -88,13 +88,67 @@
   .cal-day { margin-bottom: 20px; }
   .cal-day-header { display: flex; justify-content: space-between; align-items: center; font-family: 'Bebas Neue', sans-serif; font-size: 0.9rem; letter-spacing: 3px; color: var(--gold); padding: 8px 0; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
   .cal-day-sub { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: var(--cream-dim); }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.hidden { display: none; }
+  .modal { background: var(--felt-dark); border: 2px solid var(--gold); border-radius: 8px; max-width: 380px; width: 100%; padding: 32px 28px; text-align: center; }
+  .modal h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 3px; color: var(--gold); margin-bottom: 6px; }
+  .modal p { font-family: 'IBM Plex Sans', sans-serif; font-size: 0.85rem; color: var(--cream-dim); line-height: 1.6; margin-bottom: 20px; }
+  .modal-btn { display: block; width: 100%; padding: 14px; margin-bottom: 10px; border-radius: 5px; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; }
+  .modal-btn.primary { background: var(--gold); color: var(--felt-dark); }
+  .modal-btn.primary:hover { background: var(--gold-light); }
+  .modal-btn.secondary { background: transparent; color: var(--cream); border: 1px solid var(--border); }
+  .modal-btn.secondary:hover { border-color: var(--gold); color: var(--gold); }
+  .modal-btn-hint { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; color: var(--cream-dim); margin-top: -4px; margin-bottom: 12px; }
+  .modal-input { width: 100%; padding: 12px 14px; background: var(--felt-mid); border: 1px solid var(--border); border-radius: 4px; color: var(--cream); font-family: 'IBM Plex Mono', monospace; font-size: 0.9rem; text-align: center; margin-bottom: 10px; outline: none; }
+  .modal-input:focus { border-color: var(--gold); }
+  .modal-input.error { border-color: var(--red); animation: shake 0.3s; }
+  @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+  .modal-error { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--red); margin-bottom: 10px; min-height: 1.2em; }
+  .modal-step { display: none; }
+  .modal-step.active { display: block; }
+
+  /* Mode badge */
+  .mode-badge { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem; letter-spacing: 1px; padding: 3px 10px; border-radius: 3px; cursor: pointer; margin-top: 8px; transition: all 0.15s; text-transform: uppercase; }
+  .mode-badge.viewer { background: rgba(255,255,255,0.08); color: var(--cream-dim); border: 1px solid rgba(255,255,255,0.1); }
+  .mode-badge.editor { background: rgba(201,168,76,0.15); color: var(--gold); border: 1px solid var(--gold); }
+  .mode-badge:hover { opacity: 0.8; }
+
+  /* Read-only mode */
+  body.view-only .player-btn { cursor: default; pointer-events: none; }
+  body.view-only .player-btn:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); }
+  body.view-only .bracket-player { cursor: default; pointer-events: none; }
+  body.view-only .bracket-player:hover { background: transparent; }
 </style>
 </head>
 <body>
 
+<div id="welcome-modal" class="modal-overlay">
+  <div class="modal">
+    <div id="step-choose" class="modal-step active">
+      <h2>🎱 Sinuca 2026</h2>
+      <p>Bem-vindo ao campeonato! Acompanhe a classificação, as partidas e os playoffs em tempo real.</p>
+      <button class="modal-btn primary" onclick="enterViewer()">Quero acompanhar o campeonato</button>
+      <div class="modal-btn-hint">Visualize partidas, classificação e playoffs</div>
+      <button class="modal-btn secondary" onclick="showPasswordStep()">Quero marcar resultados de partidas</button>
+      <div class="modal-btn-hint">Requer senha de organizador</div>
+    </div>
+    <div id="step-password" class="modal-step">
+      <h2>🔐 Acesso de Organizador</h2>
+      <p>Digite a senha para marcar resultados das partidas.</p>
+      <input type="password" id="password-input" class="modal-input" placeholder="Senha" onkeydown="if(event.key==='Enter')tryPassword()">
+      <div class="modal-error" id="password-error"></div>
+      <button class="modal-btn primary" onclick="tryPassword()">Entrar</button>
+      <button class="modal-btn secondary" onclick="backToChoose()">Voltar</button>
+    </div>
+  </div>
+</div>
+
 <header>
   <h1>🎱 Sinuca 2026</h1>
   <p>14 Jogadores · 2 Turnos · Round Robin + Playoffs</p>
+  <div id="mode-badge" class="mode-badge viewer" onclick="showModal()" title="Clique para trocar o modo">Modo: Visualização</div>
 </header>
 
 <div class="tabs">
@@ -149,6 +203,67 @@
 </div>
 
 <script>
+const EDIT_PASSWORD = 'sinuca!campeao';
+let isEditor = false;
+
+function enterViewer() {
+  isEditor = false;
+  document.body.classList.add('view-only');
+  updateBadge();
+  closeModal();
+}
+
+function showPasswordStep() {
+  document.getElementById('step-choose').classList.remove('active');
+  document.getElementById('step-password').classList.add('active');
+  document.getElementById('password-error').textContent = '';
+  document.getElementById('password-input').value = '';
+  setTimeout(() => document.getElementById('password-input').focus(), 100);
+}
+
+function backToChoose() {
+  document.getElementById('step-password').classList.remove('active');
+  document.getElementById('step-choose').classList.add('active');
+}
+
+function tryPassword() {
+  const input = document.getElementById('password-input');
+  if (input.value === EDIT_PASSWORD) {
+    isEditor = true;
+    document.body.classList.remove('view-only');
+    updateBadge();
+    closeModal();
+  } else {
+    input.classList.add('error');
+    document.getElementById('password-error').textContent = 'Senha incorreta';
+    setTimeout(() => input.classList.remove('error'), 400);
+  }
+}
+
+function updateBadge() {
+  const badge = document.getElementById('mode-badge');
+  if (isEditor) {
+    badge.className = 'mode-badge editor';
+    badge.textContent = 'Modo: Organizador';
+  } else {
+    badge.className = 'mode-badge viewer';
+    badge.textContent = 'Modo: Visualização';
+  }
+}
+
+function showModal() {
+  document.getElementById('step-password').classList.remove('active');
+  document.getElementById('step-choose').classList.add('active');
+  document.getElementById('welcome-modal').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('welcome-modal').classList.add('hidden');
+}
+
+// Start in view-only mode
+document.body.classList.add('view-only');
+
 const PLAYERS = [
   'Amarildo','Arnaldo','Carcache','Donaldo','Edson',
   'Eustáquio','Fábio','Fausto','Francisco','Ivaldo',
