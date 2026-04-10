@@ -38,7 +38,7 @@
   header p { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--cream-dim); letter-spacing: 2px; margin-top: 4px; text-transform: uppercase; }
 
   .tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--felt-dark); position: sticky; top: 0; z-index: 100; overflow-x: auto; }
-  .tab { flex: 1; min-width: 68px; padding: 13px 6px; text-align: center; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase; color: var(--cream-dim); border-bottom: 3px solid transparent; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; white-space: nowrap; }
+  .tab { flex: 1; min-width: 0; padding: 13px 4px; text-align: center; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; letter-spacing: 0.5px; text-transform: uppercase; color: var(--cream-dim); border-bottom: 3px solid transparent; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; white-space: nowrap; }
   .tab:hover { color: var(--cream); }
   .tab.active { color: var(--gold); border-bottom: 3px solid var(--gold); }
 
@@ -167,7 +167,7 @@
   <button class="tab" onclick="showTab('calendar')">Calendário</button>
   <button class="tab" onclick="showTab('matches')">Partidas</button>
   <button class="tab" onclick="showTab('standings')">Classificação</button>
-  <button class="tab" onclick="showTab('playoffs')">Playoffs</button>
+  <button class="tab" onclick="showTab('playoffs')">Finais</button>
 </div>
 
 <!-- ELENCO -->
