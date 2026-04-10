@@ -37,8 +37,8 @@
   header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.6rem; letter-spacing: 4px; color: var(--gold); line-height: 1; }
   header p { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; color: var(--cream-dim); letter-spacing: 2px; margin-top: 4px; text-transform: uppercase; }
 
-  .tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--felt-dark); position: sticky; top: 0; z-index: 100; overflow-x: auto; }
-  .tab { flex: 1; min-width: 0; padding: 13px 4px; text-align: center; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem; letter-spacing: 0.5px; text-transform: uppercase; color: var(--cream-dim); border-bottom: 3px solid transparent; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; white-space: nowrap; }
+  .tabs { display: flex; justify-content: stretch; border-bottom: 1px solid var(--border); background: var(--felt-dark); position: sticky; top: 0; z-index: 100; }
+  .tab { flex: 1 1 0; min-width: 0; padding: 13px 2px; text-align: center; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; letter-spacing: 0.5px; text-transform: uppercase; color: var(--cream-dim); border-bottom: 3px solid transparent; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; white-space: nowrap; }
   .tab:hover { color: var(--cream); }
   .tab.active { color: var(--gold); border-bottom: 3px solid var(--gold); }
 
