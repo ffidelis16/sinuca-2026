@@ -332,14 +332,25 @@ let results = {};
 let playoffResults = { sf1: null, sf2: null, final: null, third: null };
 
 function saveState() {
-  db.ref('state').set({ results, playoffResults });
+  const fbResults = {};
+  for (const [k, v] of Object.entries(results)) {
+    fbResults["m" + k] = v;
+  }
+  db.ref('state').set({ results: fbResults, playoffResults });
 }
 
 // Listen for realtime updates from Firebase
 db.ref('state').on('value', (snapshot) => {
   const data = snapshot.val();
   if (data) {
-    results = data.results || {};
+    results = {};
+    if (data.results) {
+      for (const [k, v] of Object.entries(data.results)) {
+        if (v != null) {
+          results[String(k).replace(/^m/, '')] = v;
+        }
+      }
+    }
     playoffResults = data.playoffResults || { sf1: null, sf2: null, final: null, third: null };
   } else {
     results = {};
